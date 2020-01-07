@@ -3,6 +3,8 @@
 Changes: 
 * Updated dependencies with security issues (lodash, mocha)  
 * Removed mongo support altogether, leaving NeDB stuff only
+
+For a better maintained fork of camo, try https://github.com/Luidog/marpat
  
 
 # Camo
