@@ -1,4 +1,4 @@
-# This is a fork of KshitijMhatre's [duckduckgo-images-api](https://github.com/KshitijMhatre/duckduckgo-images-api)
+# This is a fork of scottwrobinson's [camo](https://github.com/scottwrobinson/camo)
 
 Changes: 
 * Updated dependencies with security issues (lodash, mocha)  
