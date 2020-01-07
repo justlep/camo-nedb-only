@@ -1,3 +1,10 @@
+# This is a fork of KshitijMhatre's [duckduckgo-images-api](https://github.com/KshitijMhatre/duckduckgo-images-api)
+
+Changes: 
+* Updated dependencies with security issues (lodash, mocha)  
+* Removed mongo support altogether, leaving NeDB stuff only
+ 
+
 # Camo
 
 **Camo needs your help!** Interested in contributing? [Let me know](mailto:s.w.robinson+camo@gmail.com)!

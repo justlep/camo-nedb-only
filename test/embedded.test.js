@@ -1,5 +1,7 @@
 'use strict';
 
+/* global describe before beforeEach afterEach after it */
+
 const _ = require('lodash');
 const fs = require('fs');
 const expect = require('chai').expect;
@@ -14,19 +16,18 @@ const getData2 = require('./util').data2;
 const validateId = require('./util').validateId;
 
 describe('Embedded', function() {
-
-    // TODO: Should probably use mock database client...
     const url = 'nedb://memory';
-    //const url = 'mongodb://localhost/camo_test';
     let database = null;
 
     before(function(done) {
-        connect(url).then(function(db) {
-            database = db;
-            return database.dropDatabase();
-        }).then(function() {
-            return done();
-        });
+        connect(url)
+            .then(function(db) {
+                database = db;
+                return database.dropDatabase();
+            })
+            .then(function() {
+                return done();
+            });
     });
 
     beforeEach(function(done) {
@@ -34,16 +35,21 @@ describe('Embedded', function() {
     });
 
     afterEach(function(done) {
-        database.dropDatabase().then(function() {}).then(done, done);
+        database
+            .dropDatabase()
+            .then(function() {})
+            .then(done, done);
     });
 
     after(function(done) {
-        database.dropDatabase().then(function() {}).then(done, done);
+        database
+            .dropDatabase()
+            .then(function() {})
+            .then(done, done);
     });
 
     describe('general', function() {
         it('should not have an _id', function(done) {
-
             class EmbeddedModel extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -64,18 +70,21 @@ describe('Embedded', function() {
             data.mod.str = 'some data';
             data.num = 1;
 
-            data.save().then(function() {
-                expect(data.mod._id).to.be.undefined;
-                return DocumentModel.findOne({ num: 1 });
-            }).then(function(d) {
-                expect(d.mod._id).to.be.undefined;
-            }).then(done, done);
+            data
+                .save()
+                .then(function() {
+                    expect(data.mod._id).to.be.undefined;
+                    return DocumentModel.findOne({ num: 1 });
+                })
+                .then(function(d) {
+                    expect(d.mod._id).to.be.undefined;
+                })
+                .then(done, done);
         });
     });
 
     describe('types', function() {
         it('should allow embedded types', function(done) {
-
             class EmbeddedModel extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -96,20 +105,23 @@ describe('Embedded', function() {
             data.mod.str = 'some data';
             data.num = 1;
 
-            data.save().then(function() {
-                validateId(data);
-                return DocumentModel.findOne({ num: 1 });
-            }).then(function(d) {
-                validateId(d);
-                expect(d.num).to.be.equal(1);
-                expect(d.mod).to.be.a('object');
-                expect(d.mod).to.be.an.instanceof(EmbeddedModel);
-                expect(d.mod.str).to.be.equal('some data');
-            }).then(done, done);
+            data
+                .save()
+                .then(function() {
+                    validateId(data);
+                    return DocumentModel.findOne({ num: 1 });
+                })
+                .then(function(d) {
+                    validateId(d);
+                    expect(d.num).to.be.equal(1);
+                    expect(d.mod).to.be.a('object');
+                    expect(d.mod).to.be.an.instanceof(EmbeddedModel);
+                    expect(d.mod.str).to.be.equal('some data');
+                })
+                .then(done, done);
         });
 
-    it('should allow array of embedded types', function(done) {
-
+        it('should allow array of embedded types', function(done) {
             class Limb extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -140,20 +152,24 @@ describe('Embedded', function() {
             person.limbs.push(Limb.create());
             person.limbs[3].type = 'right leg';
 
-            person.save().then(function() {
-                validateId(person);
-                expect(person.limbs).to.have.length(4);
-                return Person.findOne({ name: 'Scott' });
-            }).then(function(p) {
-                validateId(p);
-                expect(p.name).to.be.equal('Scott');
-                expect(p.limbs).to.be.a('array');
-                expect(p.limbs).to.have.length(4);
-                expect(p.limbs[0].type).to.be.equal('left arm');
-                expect(p.limbs[1].type).to.be.equal('right arm');
-                expect(p.limbs[2].type).to.be.equal('left leg');
-                expect(p.limbs[3].type).to.be.equal('right leg');
-            }).then(done, done);
+            person
+                .save()
+                .then(function() {
+                    validateId(person);
+                    expect(person.limbs).to.have.length(4);
+                    return Person.findOne({ name: 'Scott' });
+                })
+                .then(function(p) {
+                    validateId(p);
+                    expect(p.name).to.be.equal('Scott');
+                    expect(p.limbs).to.be.a('array');
+                    expect(p.limbs).to.have.length(4);
+                    expect(p.limbs[0].type).to.be.equal('left arm');
+                    expect(p.limbs[1].type).to.be.equal('right arm');
+                    expect(p.limbs[2].type).to.be.equal('left leg');
+                    expect(p.limbs[3].type).to.be.equal('right leg');
+                })
+                .then(done, done);
         });
 
         it('should save nested array of embeddeds', function(done) {
@@ -182,28 +198,31 @@ describe('Embedded', function() {
             let map = WorldMap.create();
             let polygon1 = Polygon.create();
             let polygon2 = Polygon.create();
-            let point1 = Point.create({ x: 123.45, y: 678.90 });
-            let point2 = Point.create({ x: 543.21, y: 987.60 });
+            let point1 = Point.create({ x: 123.45, y: 678.9 });
+            let point2 = Point.create({ x: 543.21, y: 987.6 });
 
             map.polygons.push(polygon1);
             map.polygons.push(polygon2);
             polygon2.points.push(point1);
             polygon2.points.push(point2);
 
-            map.save().then(function() {
-                return WorldMap.findOne();
-            }).then(function(m) {
-                expect(m.polygons).to.have.length(2);
-                expect(m.polygons[0]).to.be.instanceof(Polygon);
-                expect(m.polygons[1]).to.be.instanceof(Polygon);
-                expect(m.polygons[1].points).to.have.length(2);
-                expect(m.polygons[1].points[0]).to.be.instanceof(Point);
-                expect(m.polygons[1].points[1]).to.be.instanceof(Point);
-            }).then(done, done);
+            map
+                .save()
+                .then(function() {
+                    return WorldMap.findOne();
+                })
+                .then(function(m) {
+                    expect(m.polygons).to.have.length(2);
+                    expect(m.polygons[0]).to.be.instanceof(Polygon);
+                    expect(m.polygons[1]).to.be.instanceof(Polygon);
+                    expect(m.polygons[1].points).to.have.length(2);
+                    expect(m.polygons[1].points[0]).to.be.instanceof(Point);
+                    expect(m.polygons[1].points[1]).to.be.instanceof(Point);
+                })
+                .then(done, done);
         });
 
         it('should allow nested initialization of embedded types', function(done) {
-
             class Discount extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -228,18 +247,20 @@ describe('Embedded', function() {
                 }
             });
 
-            product.save().then(function() {
-                validateId(product);
-                expect(product.name).to.be.equal('bike');
-                expect(product.discount).to.be.a('object');
-                expect(product.discount instanceof Discount).to.be.true;
-                expect(product.discount.authorized).to.be.equal(true);
-                expect(product.discount.amount).to.be.equal(9.99);
-            }).then(done, done);
+            product
+                .save()
+                .then(function() {
+                    validateId(product);
+                    expect(product.name).to.be.equal('bike');
+                    expect(product.discount).to.be.a('object');
+                    expect(product.discount instanceof Discount).to.be.true;
+                    expect(product.discount.authorized).to.be.equal(true);
+                    expect(product.discount.amount).to.be.equal(9.99);
+                })
+                .then(done, done);
         });
 
         it('should allow initialization of array of embedded documents', function(done) {
-
             class Discount extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -258,33 +279,37 @@ describe('Embedded', function() {
 
             let product = Product.create({
                 name: 'bike',
-                discounts: [{
-                    authorized: true,
-                    amount: 9.99
-                },
-                {
-                    authorized: false,
-                    amount: 187.44
-                }]
+                discounts: [
+                    {
+                        authorized: true,
+                        amount: 9.99
+                    },
+                    {
+                        authorized: false,
+                        amount: 187.44
+                    }
+                ]
             });
 
-            product.save().then(function() {
-                validateId(product);
-                expect(product.name).to.be.equal('bike');
-                expect(product.discounts).to.have.length(2);
-                expect(product.discounts[0] instanceof Discount).to.be.true;
-                expect(product.discounts[1] instanceof Discount).to.be.true;
-                expect(product.discounts[0].authorized).to.be.equal(true);
-                expect(product.discounts[0].amount).to.be.equal(9.99);
-                expect(product.discounts[1].authorized).to.be.equal(false);
-                expect(product.discounts[1].amount).to.be.equal(187.44);
-            }).then(done, done);
+            product
+                .save()
+                .then(function() {
+                    validateId(product);
+                    expect(product.name).to.be.equal('bike');
+                    expect(product.discounts).to.have.length(2);
+                    expect(product.discounts[0] instanceof Discount).to.be.true;
+                    expect(product.discounts[1] instanceof Discount).to.be.true;
+                    expect(product.discounts[0].authorized).to.be.equal(true);
+                    expect(product.discounts[0].amount).to.be.equal(9.99);
+                    expect(product.discounts[1].authorized).to.be.equal(false);
+                    expect(product.discounts[1].amount).to.be.equal(187.44);
+                })
+                .then(done, done);
         });
     });
 
     describe('defaults', function() {
         it('should assign defaults to embedded types', function(done) {
-
             class EmbeddedModel extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -304,17 +329,20 @@ describe('Embedded', function() {
             data.emb = EmbeddedModel.create();
             data.num = 1;
 
-            data.save().then(function() {
-                validateId(data);
-                return DocumentModel.findOne({ num: 1 });
-            }).then(function(d) {
-                validateId(d);
-                expect(d.emb.str).to.be.equal('hello');
-            }).then(done, done);
+            data
+                .save()
+                .then(function() {
+                    validateId(data);
+                    return DocumentModel.findOne({ num: 1 });
+                })
+                .then(function(d) {
+                    validateId(d);
+                    expect(d.emb.str).to.be.equal('hello');
+                })
+                .then(done, done);
         });
 
         it('should assign defaults to array of embedded types', function(done) {
-
             class Money extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -336,23 +364,25 @@ describe('Embedded', function() {
             wallet.contents.push(Money.create());
             wallet.contents.push(Money.create());
 
-            wallet.save().then(function() {
-                validateId(wallet);
-                return Wallet.findOne({ owner: 'Scott' });
-            }).then(function(w) {
-                validateId(w);
-                expect(w.owner).to.be.equal('Scott');
-                expect(w.contents[0].value).to.be.equal(100);
-                expect(w.contents[1].value).to.be.equal(100);
-                expect(w.contents[2].value).to.be.equal(100);
-            }).then(done, done);
+            wallet
+                .save()
+                .then(function() {
+                    validateId(wallet);
+                    return Wallet.findOne({ owner: 'Scott' });
+                })
+                .then(function(w) {
+                    validateId(w);
+                    expect(w.owner).to.be.equal('Scott');
+                    expect(w.contents[0].value).to.be.equal(100);
+                    expect(w.contents[1].value).to.be.equal(100);
+                    expect(w.contents[2].value).to.be.equal(100);
+                })
+                .then(done, done);
         });
     });
 
     describe('validate', function() {
-
         it('should validate embedded values', function(done) {
-
             class EmbeddedModel extends EmbeddedDocument {
                 constructor() {
                     super();
@@ -371,20 +401,115 @@ describe('Embedded', function() {
             data.emb = EmbeddedModel.create();
             data.emb.num = 26;
 
-            data.save().then(function() {
-                expect.fail(null, Error, 'Expected error, but got none.');
-            }).catch(function(error) {
-                expect(error).to.be.instanceof(ValidationError);
-                expect(error.message).to.contain('max');
-            }).then(done, done);
+            data
+                .save()
+                .then(function() {
+                    expect.fail(null, Error, 'Expected error, but got none.');
+                })
+                .catch(function(error) {
+                    expect(error).to.be.instanceof(ValidationError);
+                    expect(error.message).to.contain('max');
+                })
+                .then(done, done);
         });
+        it('should accept a validation function', function(done) {
+            class EmbeddedModel extends EmbeddedDocument {
+                constructor() {
+                    super();
+                    this.num = { type: Number, validate: value => value !== 1, max: 10 };
+                }
+            }
 
+            class DocumentModel extends Document {
+                constructor() {
+                    super();
+                    this.emb = EmbeddedModel;
+                }
+            }
+
+            let data = DocumentModel.create();
+            data.emb = EmbeddedModel.create();
+            data.emb.num = 1;
+
+            data
+                .save()
+                .then(function() {
+                    expect.fail(null, Error, 'Expected error, but got none.');
+                })
+                .catch(function(error) {
+                    expect(error).to.be.instanceof(ValidationError);
+                })
+                .then(done, done);
+        });
+        it('should accept a validation function', function(done) {
+            class EmbeddedModel extends EmbeddedDocument {
+                constructor() {
+                    super();
+                    this.num = { type: Number, validate: value => value !== 1, max: 10 };
+                }
+            }
+
+            class DocumentModel extends Document {
+                constructor() {
+                    super();
+                    this.emb = EmbeddedModel;
+                }
+            }
+
+            let data = DocumentModel.create();
+            data.emb = EmbeddedModel.create();
+            data.emb.num = 26;
+
+            data
+                .save()
+                .then(function() {
+                    expect.fail(null, Error, 'Expected error, but got none.');
+                })
+                .catch(function(error) {
+                    expect(error).to.be.instanceof(ValidationError);
+                    expect(error.message).to.contain('max');
+                })
+                .then(done, done);
+        });
+        it('should accept an array of validation functions', function(done) {
+            class EmbeddedModel extends EmbeddedDocument {
+                constructor() {
+                    super();
+                    this.num = { type: Number, validate: value => value !== 1 };
+                }
+            }
+
+            class DocumentModel extends Document {
+                constructor() {
+                    super();
+                    this.embs = [EmbeddedModel];
+                }
+            }
+
+            let data = DocumentModel.create();
+            let emb1 = EmbeddedModel.create({ num: 2 });
+            let emb2 = EmbeddedModel.create({ num: 1 });
+            data.embs.push(emb1);
+            data.embs.push(emb2);
+
+            data
+                .save()
+                .then(function() {
+                    expect.fail(null, Error, 'Expected error, but got none.');
+                })
+                .catch(function(error) {
+                    expect(error).to.be.instanceof(ValidationError);
+                })
+                .then(done, done);
+        });
         it('should validate array of embedded values', function(done) {
-
             class Money extends EmbeddedDocument {
                 constructor() {
                     super();
-                    this.value = { type: Number, choices: [1, 5, 10, 20, 50, 100] };
+                    this.value = {
+                        type: Number,
+                        choices: [1, 5, 10, 20, 50, 100]
+                    };
                 }
             }
 
@@ -401,14 +526,17 @@ describe('Embedded', function() {
             wallet.contents.push(Money.create());
             wallet.contents[1].value = 26;
 
-            wallet.save().then(function() {
-                expect.fail(null, Error, 'Expected error, but got none.');
-            }).catch(function(error) {
-                expect(error).to.be.instanceof(ValidationError);
-                expect(error.message).to.contain('choices');
-            }).then(done, done);
+            wallet
+                .save()
+                .then(function() {
+                    expect.fail(null, Error, 'Expected error, but got none.');
+                })
+                .catch(function(error) {
+                    expect(error).to.be.instanceof(ValidationError);
+                    expect(error.message).to.contain('choices');
+                })
+                .then(done, done);
         });
-
     });
 
     describe('canonicalize', function() {
@@ -449,22 +577,33 @@ describe('Embedded', function() {
                 }
             });
 
-            person.save().then(function() {
-                validateId(person);
-                expect(person.gradSchool.school).to.be.equal('CMU');
-                expect(person.gradSchool.dateGraduated.getFullYear()).to.be.equal(now.getFullYear());
-                expect(person.gradSchool.dateGraduated.getHours()).to.be.equal(now.getHours());
-                expect(person.gradSchool.dateGraduated.getMinutes()).to.be.equal(now.getMinutes());
-                expect(person.gradSchool.dateGraduated.getMonth()).to.be.equal(now.getMonth());
-                expect(person.gradSchool.dateGraduated.getSeconds()).to.be.equal(now.getSeconds());
-            }).then(done, done);
+            person
+                .save()
+                .then(function() {
+                    validateId(person);
+                    expect(person.gradSchool.school).to.be.equal('CMU');
+                    expect(person.gradSchool.dateGraduated.getFullYear()).to.be.equal(
+                        now.getFullYear()
+                    );
+                    expect(person.gradSchool.dateGraduated.getHours()).to.be.equal(
+                        now.getHours()
+                    );
+                    expect(person.gradSchool.dateGraduated.getMinutes()).to.be.equal(
+                        now.getMinutes()
+                    );
+                    expect(person.gradSchool.dateGraduated.getMonth()).to.be.equal(
+                        now.getMonth()
+                    );
+                    expect(person.gradSchool.dateGraduated.getSeconds()).to.be.equal(
+                        now.getSeconds()
+                    );
+                })
+                .then(done, done);
         });
     });
 
     describe('hooks', function() {
-
         it('should call all pre and post functions on embedded models', function(done) {
-
             let preValidateCalled = false;
             let preSaveCalled = false;
             let preDeleteCalled = false;
@@ -514,30 +653,33 @@ describe('Embedded', function() {
             let cup = Cup.create();
             cup.contents = Coffee.create();
 
-            cup.save().then(function() {
-                validateId(cup);
+            cup
+                .save()
+                .then(function() {
+                    validateId(cup);
 
-                // Pre/post save and validate should be called
-                expect(preValidateCalled).to.be.equal(true);
-                expect(preSaveCalled).to.be.equal(true);
-                expect(postValidateCalled).to.be.equal(true);
-                expect(postSaveCalled).to.be.equal(true);
-                
-                // Pre/post delete should not have been called yet
-                expect(preDeleteCalled).to.be.equal(false);
-                expect(postDeleteCalled).to.be.equal(false);
+                    // Pre/post save and validate should be called
+                    expect(preValidateCalled).to.be.equal(true);
+                    expect(preSaveCalled).to.be.equal(true);
+                    expect(postValidateCalled).to.be.equal(true);
+                    expect(postSaveCalled).to.be.equal(true);
 
-                return cup.delete();
-            }).then(function(numDeleted) {
-                expect(numDeleted).to.be.equal(1);
+                    // Pre/post delete should not have been called yet
+                    expect(preDeleteCalled).to.be.equal(false);
+                    expect(postDeleteCalled).to.be.equal(false);
 
-                expect(preDeleteCalled).to.be.equal(true);
-                expect(postDeleteCalled).to.be.equal(true);
-            }).then(done, done);
+                    return cup.delete();
+                })
+                .then(function(numDeleted) {
+                    expect(numDeleted).to.be.equal(1);
+
+                    expect(preDeleteCalled).to.be.equal(true);
+                    expect(postDeleteCalled).to.be.equal(true);
+                })
+                .then(done, done);
         });
 
         it('should call all pre and post functions on array of embedded models', function(done) {
-
             let preValidateCalled = false;
             let preSaveCalled = false;
             let preDeleteCalled = false;
@@ -588,26 +730,30 @@ describe('Embedded', function() {
             wallet.contents.push(Money.create());
             wallet.contents.push(Money.create());
 
-            wallet.save().then(function() {
-                validateId(wallet);
+            wallet
+                .save()
+                .then(function() {
+                    validateId(wallet);
 
-                // Pre/post save and validate should be called
-                expect(preValidateCalled).to.be.equal(true);
-                expect(postValidateCalled).to.be.equal(true);
-                expect(preSaveCalled).to.be.equal(true);
-                expect(postSaveCalled).to.be.equal(true);
-                
-                // Pre/post delete should not have been called yet
-                expect(preDeleteCalled).to.be.equal(false);
-                expect(postDeleteCalled).to.be.equal(false);
+                    // Pre/post save and validate should be called
+                    expect(preValidateCalled).to.be.equal(true);
+                    expect(postValidateCalled).to.be.equal(true);
+                    expect(preSaveCalled).to.be.equal(true);
+                    expect(postSaveCalled).to.be.equal(true);
 
-                return wallet.delete();
-            }).then(function(numDeleted) {
-                expect(numDeleted).to.be.equal(1);
+                    // Pre/post delete should not have been called yet
+                    expect(preDeleteCalled).to.be.equal(false);
+                    expect(postDeleteCalled).to.be.equal(false);
 
-                expect(preDeleteCalled).to.be.equal(true);
-                expect(postDeleteCalled).to.be.equal(true);
-            }).then(done, done);
+                    return wallet.delete();
+                })
+                .then(function(numDeleted) {
+                    expect(numDeleted).to.be.equal(1);
+
+                    expect(preDeleteCalled).to.be.equal(true);
+                    expect(postDeleteCalled).to.be.equal(true);
+                })
+                .then(done, done);
         });
     });
 
@@ -650,24 +796,27 @@ describe('Embedded', function() {
                 }
             });
 
-            person.save().then(function() {
-                validateId(person);
-                expect(person.name).to.be.equal('Scott');
-                expect(person.address).to.be.an.instanceof(Address);
-                expect(person.address.street).to.be.equal('123 Fake St.');
-                expect(person.address.city).to.be.equal('Cityville');
-                expect(person.address.zipCode).to.be.equal(12345);
-                expect(person.address.isPoBox).to.be.equal(false);
+            person
+                .save()
+                .then(function() {
+                    validateId(person);
+                    expect(person.name).to.be.equal('Scott');
+                    expect(person.address).to.be.an.instanceof(Address);
+                    expect(person.address.street).to.be.equal('123 Fake St.');
+                    expect(person.address.city).to.be.equal('Cityville');
+                    expect(person.address.zipCode).to.be.equal(12345);
+                    expect(person.address.isPoBox).to.be.equal(false);
 
-                let json = person.toJSON();
+                    let json = person.toJSON();
 
-                expect(json.name).to.be.equal('Scott');
-                expect(json.address).to.not.be.an.instanceof(Address);
-                expect(json.address.street).to.be.equal('123 Fake St.');
-                expect(json.address.city).to.be.equal('Cityville');
-                expect(json.address.zipCode).to.be.equal(12345);
-                expect(json.address.isPoBox).to.be.equal(false);
-            }).then(done, done);
+                    expect(json.name).to.be.equal('Scott');
+                    expect(json.address).to.not.be.an.instanceof(Address);
+                    expect(json.address.street).to.be.equal('123 Fake St.');
+                    expect(json.address.city).to.be.equal('Cityville');
+                    expect(json.address.zipCode).to.be.equal(12345);
+                    expect(json.address.isPoBox).to.be.equal(false);
+                })
+                .then(done, done);
         });
 
         it('should serialize data to JSON and ignore methods', function(done) {
@@ -701,8 +850,8 @@ describe('Embedded', function() {
 
             let person = Person.create({
                 name: 'Scott',
-                address : {
-                    street : 'Bar street'
+                address: {
+                    street: 'Bar street'
                 }
             });
 
