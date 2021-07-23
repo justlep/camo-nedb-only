@@ -1,5 +1,5 @@
 # This is a fork of scottwrobinson's [camo](https://github.com/scottwrobinson/camo)
-[![Build Status](https://travis-ci.org/justlep/camo-nedb-only.svg?branch=master)](https://travis-ci.org/justlep/camo-nedb-only)
+[![Build Status](https://api.travis-ci.com/justlep/camo-nedb-only.svg?branch=master)](https://travis-ci.com/justlep/camo-nedb-only)
 
 Changes: 
 * Updated dependencies with security issues (lodash, mocha)  
